@@ -18,7 +18,6 @@ local function setup_case(prefix, word)
 end
 
 local function fuzzy_match(prefix, word)
-  prefix, word = setup_case(prefix, word)
   local score = util.fuzzy_score(prefix, word)
   if score < 1 then
     return true, score
@@ -29,7 +28,6 @@ end
 
 
 local function substring_match(prefix, word)
-  prefix, word = setup_case(prefix, word)
   if string.find(word, prefix) then
     return true
   else
@@ -38,7 +36,6 @@ local function substring_match(prefix, word)
 end
 
 local function exact_match(prefix, word)
-  prefix, word = setup_case(prefix, word)
   if vim.startswith(word, prefix) then
     return true
   else
@@ -60,8 +57,10 @@ local matching_strategy = {
 M.matching = function(complete_items, prefix, item)
   local matcher_list = opt.get_option('matching_strategy_list')
   local matching_priority = 2
+  local word = item.word
+  prefix, word = setup_case(prefix, word)
   for _, method in ipairs(matcher_list) do
-    local is_match, score = matching_strategy[method](prefix, item.word)
+    local is_match, score = matching_strategy[method](prefix, word)
     if is_match then
       if item.abbr == nil then
         item.abbr = item.word
